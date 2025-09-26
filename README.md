@@ -27,7 +27,7 @@ Users can register, manage accounts, trade stocks, and generate daily reports wi
 
 ##  Setup
 
-1. close repository
+1. clone repository
 git clone (https://github.com/muhammad-umer-git/TRADING_APP.git)
 cd core
 
