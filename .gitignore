@@ -13,3 +13,14 @@ __pycache__/
 .idea/
 
 .env
+
+# Logs
+logs/
+*.log
+
+# CSV / Data files
+*.csv
+*.tsv
+*.rdb
+*.json
+*.sqlite3
