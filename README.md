@@ -6,7 +6,7 @@ Users can register, manage accounts, trade stocks, and generate daily reports wi
 ---
 
 ## Tech Stack
-- Python 3.11
+- Python 3.12
 - Django + Django REST Framework
 - PostgreSQL (database)
 - Redis (cache + Celery broker)
