@@ -27,42 +27,57 @@ Users can register, manage accounts, trade stocks, and generate daily reports wi
 
 ##  Setup
 
-1. clone repository
-git clone (https://github.com/muhammad-umer-git/TRADING_APP.git)
-cd core
+1. Clone Repository
+git clone https://github.com/muhammad-umer-git/TRADING_APP.git
+cd TRADING_APP/core
 
-2. Install dependencies
+2. Create Virtual Environment & Install Dependencies
+python -m venv .venv
+source .venv/bin/activate   # Linux / Mac
+.venv\Scripts\activate      # Windows (PowerShell)
+
 pip install -r requirements.txt
 
-3. Configure database (in settings.py)
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'trading_db',
-        'USER': 'trading_user',
-        'PASSWORD': 'mypassword',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
-4. Run migrations
+3. Configure Environment Variables
+
+Create a .env file in the core/ directory with:
+
+DEBUG=True
+SECRET_KEY=your_secret_key_here
+
+DB_NAME=trading_db
+DB_USER=trading_user
+DB_PASSWORD=mypassword
+DB_HOST=localhost
+DB_PORT=5432
+
+
+4. Run Migrations
 python manage.py migrate
 
-5. Create a superuser (optional)
+5. Create Superuser (Optional)
 python manage.py createsuperuser
-(one already created)
-(username: admin ,  password : admin)
 
-6. Start Redis ( for cashe and celery)
+(You can also use the default admin)
+username:admin
+password:admin
+
+6. Start Redis (for cache & Celery)
 redis-server
 
-7. Start celery worker and beat in separate terminals
+7. Start Celery Worker & Beat
+
+Open two terminals:
+
 celery -A core worker -l info
 celery -A core beat -l info
 
-8. Start Django Development Server
+8. Run Development Server
 python manage.py runserver
 
-9. Access the app
-- API: http://127.0.0.1:8000/ 
-- Admin panel : http://127.0.0.1:8000/admin/
+9. Access the App
+
+API: http://127.0.0.1:8000/
+
+Admin Panel: http://127.0.0.1:8000/admin/
+
