@@ -5,6 +5,3 @@ class AccountsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'accounts'
 
-    def ready(self):
-        # Import tasks so Celery knows them
-        import accounts.api.tasks

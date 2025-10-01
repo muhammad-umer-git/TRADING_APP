@@ -119,14 +119,20 @@ def update_stock_prices():
             ticker = yf.Ticker(symbol)
             price = ticker.history(period="1d")["Close"].iloc[-1]
 
-            stock, created = Stock.objects.update_or_create(
-                symbol=symbol,
-                defaults={"price": price},
-            )
+            # stock, created = Stock.objects.update_or_create(
+            #     symbol=symbol,
+            #     defaults={"price": price},
+            # )
+            if price:
+                stock = Stock.objects.get(symbol=symbol)
+                stock.price = price
+                stock.save()
 
-            cache.set(f"stock:{symbol}", price, timeout=60*5)
+                cache.set(f"stock:{symbol}", price, timeout=60*5)
 
-            logger.info(f"Updated {symbol} with price {price}")
+                logger.info(f"Updated {symbol} with price {price}")
+            else:
+                logger.warning(f"Price not found for {symbol}")
 
         except Exception as e:
             logger.error(f"Failed to update {symbol}: {e}")
