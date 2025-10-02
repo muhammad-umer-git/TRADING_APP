@@ -9,13 +9,14 @@ import yfinance as yf
 import csv
 import os
 from django.conf import settings
+import time
 
 
 import logging
 logger = logging.getLogger("trade_logger")
 
 
-@shared_task (queue="tardes", priority=0)
+@shared_task (queue="trades", priority=0)
 def process_trade(user_id, symbol, quantity, trade_type):
     logger.info(f"Starting{trade_type} trade for user={user_id}, symbol={symbol}, quantity={quantity}")
     with transaction.atomic():
@@ -102,13 +103,14 @@ def process_trade(user_id, symbol, quantity, trade_type):
                 return {"message": f"{trade_type} order executed successfully"}
         except Exception as e:
             logger.error(f"Trade failed for user={user_id}, symbol={symbol}, error={str(e)}")
+            return {"error":str(e)}
 
 @shared_task
 def test_beat_task():
     logger.info("Celery beat task executed successfully")
     return "Beat task executed"
 
-@shared_task(queue="updates", priority=9)
+@shared_task(rate_limit="5/m", queue="updates", priority=9)
 def update_stock_prices():
     logger.info("Starting stock price update task ...")
 
@@ -119,10 +121,6 @@ def update_stock_prices():
             ticker = yf.Ticker(symbol)
             price = ticker.history(period="1d")["Close"].iloc[-1]
 
-            # stock, created = Stock.objects.update_or_create(
-            #     symbol=symbol,
-            #     defaults={"price": price},
-            # )
             if price:
                 stock = Stock.objects.get(symbol=symbol)
                 stock.price = price
@@ -138,7 +136,7 @@ def update_stock_prices():
             logger.error(f"Failed to update {symbol}: {e}")
 
 
-@shared_task
+@shared_task(rate_limit = "1/h")
 def generate_daily_report():
     reports_dir = os.path.join(settings.BASE_DIR, "reports")
     os.makedirs(reports_dir, exist_ok=True)
