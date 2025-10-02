@@ -1,5 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework import viewsets, status
+from rest_framework import filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from .serializers import RegisterSerializer, AccountSerializer, PositionSerializer, LedgerSerializer, StockSerializer, TradeSerializer
@@ -36,7 +37,7 @@ class ProtectedAPIView(APIView):
 
 class AccountViewSets(viewsets.ModelViewSet):
 
-    queryset = Account.objects.all
+    queryset = Account.objects.select_related("user").prefetch_related("positions", "ledger", "trades")
     serializer_class = AccountSerializer
     permission_classes = [IsAuthenticated]
         
@@ -61,8 +62,13 @@ class StockViewSet(viewsets.ModelViewSet):
     queryset = Stock.objects.all().order_by("id")
     serializer_class = StockSerializer
     permission_classes = [AllowAny]
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ["symbol", "exchange"]
+    search_fields = ["symbol", "name"]
+    ordering_fields = ["price", "symbol", "created_at"]
+    ordering = ["symbol"]
+
+
 
     @action(detail=False, methods=["post"], permission_classes=[IsAuthenticated])
     def ingest(self, request):
@@ -75,7 +81,7 @@ class StockViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"], url_path="detail", permission_classes=[AllowAny])
     def detail(self, request, pk=None):
-        stock=get_object_or_404(Stock, pk=pk)
+        stock=self.get_object()
         key = f"stock:{stock.symbol}"
         data = cache.get(key)
 
@@ -86,7 +92,7 @@ class StockViewSet(viewsets.ModelViewSet):
         return Response(data)
 
 class TradeViewSet(viewsets.ModelViewSet):
-    queryset = Trade.objects.all()
+    queryset = Trade.objects.select_related("account", "account__user").all()
     serializer_class = TradeSerializer
     permission_classes = [IsAuthenticated]
 

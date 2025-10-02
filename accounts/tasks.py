@@ -15,7 +15,7 @@ import logging
 logger = logging.getLogger("trade_logger")
 
 
-@shared_task
+@shared_task (queue="tardes", priority=0)
 def process_trade(user_id, symbol, quantity, trade_type):
     logger.info(f"Starting{trade_type} trade for user={user_id}, symbol={symbol}, quantity={quantity}")
     with transaction.atomic():
@@ -108,7 +108,7 @@ def test_beat_task():
     logger.info("Celery beat task executed successfully")
     return "Beat task executed"
 
-@shared_task
+@shared_task(queue="updates", priority=9)
 def update_stock_prices():
     logger.info("Starting stock price update task ...")
 

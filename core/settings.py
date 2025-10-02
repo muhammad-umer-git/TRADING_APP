@@ -46,12 +46,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts',
-    'accounts.api',
     'rest_framework',
     'rest_framework_simplejwt',
+    'debug_toolbar',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -60,6 +62,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+INTERNAL_IPS = ["127.0.0.1"]
 
 ROOT_URLCONF = 'core.urls'
 
@@ -218,7 +222,11 @@ CELERY_BEAT_SCHEDULE = {
   },
   "update_stock_prices_every_minute":{
     "task": "accounts.tasks.update_stock_prices",
-    "schedule": 60.0, 
+    "schedule": 60.0,
+    "options": {
+        "queue":"updates",
+        "priority": 9,
+    } 
   },
   "daily_trade_report":{
       "task":"accounts.tasks.generate_daily_report",
