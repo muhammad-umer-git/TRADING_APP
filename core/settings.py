@@ -50,9 +50,11 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'debug_toolbar',
     'django_filters',
+    'silk',
 ]
 
 MIDDLEWARE = [
+    'silk.middleware.SilkyMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
