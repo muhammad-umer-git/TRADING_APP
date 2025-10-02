@@ -6,6 +6,7 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return f"{self.username}"
+    
 
 class Account(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name = "account")
@@ -16,6 +17,7 @@ class Account(models.Model):
     def __str__(self):
         return f"{self.user.username}"
     
+    
 class Position(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="positions")
     symbol = models.CharField(max_length=10)
@@ -25,6 +27,8 @@ class Position(models.Model):
 
     def __str__(self):
         return f"{self.symbol} - {self.quantity} @ {self.average_price}"
+    
+
 
 class Ledger(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="ledger")
@@ -36,6 +40,7 @@ class Ledger(models.Model):
         return f"{self.amount} {self.transaction_type} on {self.timestamp}"
     
 
+
 class Stock(models.Model):
     symbol = models.CharField(max_length=10, unique=True)
     name = models.CharField(max_length=100)
@@ -45,6 +50,12 @@ class Stock(models.Model):
 
     def __str__(self):
         return f"{self.name} {self.exchange} @ {self.price}"
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=["symbol"]),
+        ]
+
 
 class Trade(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="trades")
@@ -53,3 +64,4 @@ class Trade(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     quantity = models.DecimalField(max_digits=10, decimal_places=2)
     timestamp = models.DateTimeField()    
+
