@@ -4,7 +4,7 @@ from rest_framework import filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from .serializers import RegisterSerializer, AccountSerializer, PositionSerializer, LedgerSerializer, StockSerializer, TradeSerializer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from accounts.models import Account, Position, Ledger, Stock, Trade
 from rest_framework import generics
 from django_filters.rest_framework import DjangoFilterBackend
@@ -37,6 +37,7 @@ class ProtectedAPIView(APIView):
         account = request.user.account
         serializer = AccountSerializer(account)
         return Response ({
+            "id" : request.user.account.id,
             "username" : request.user.username,
             "account" : serializer.data
         })
@@ -75,10 +76,9 @@ class StockViewSet(viewsets.ModelViewSet):
     search_fields = ["symbol", "name"]
     ordering_fields = ["price", "symbol", "created_at"]
     ordering = ["symbol"]
+    lookup_field="symbol"
 
-
-
-    @action(detail=False, methods=["post"], permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=["post"], permission_classes=[IsAdminUser])
     def ingest(self, request):
         serializer = self.get_serializer(data = request.data, many=True)
         if serializer.is_valid():
@@ -87,9 +87,12 @@ class StockViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
-    @action(detail=True, methods=["get"], url_path="detail", permission_classes=[AllowAny])
-    def detail(self, request, pk=None):
-        stock=self.get_object()
+
+
+    @action(detail=False, methods=["get"])
+    def stock_detail(self, request, symbol=None):
+
+        stock = get_object_or_404(Stock, symbol=symbol)
         key = f"stock:{stock.symbol}"
         data = cache.get(key)
 
@@ -111,4 +114,4 @@ class TradeViewSet(viewsets.ModelViewSet):
         trade_type = request.data.get("trade_type")
 
         process_trade.delay(request.user.id, symbol, quantity, trade_type)
-        return Response({"message": "Trade submitted for processing."})
+        return Response({"message": f"{trade_type} order executed successfully"})

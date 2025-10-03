@@ -5,7 +5,7 @@ class CustomUser(AbstractUser):
     # name = models.CharField(max_length=20)
 
     def __str__(self):
-        return f"{self.username}"
+        return f"{self.username, self.id}"
     
 
 class Account(models.Model):
@@ -15,7 +15,7 @@ class Account(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username}"
+        return f"{self.user.username, self.id}"
     
     
 class Position(models.Model):
