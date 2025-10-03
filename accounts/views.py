@@ -13,14 +13,22 @@ from django.shortcuts import get_object_or_404
 from django.core.cache import cache
 from decimal import Decimal
 from .tasks import process_trade
+from core.throttles import LoginThrottle, RegisterThrottle
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 class RegisterView(APIView):
+    throttle_classes = [RegisterThrottle]  
+
     def post(self, request):
         serilaizer = RegisterSerializer(data = request.data)
         if serilaizer.is_valid():
             serilaizer.save()
             return Response({"message":"User has been Registered Successfully"}, status=status.HTTP_201_CREATED)
         return Response(serilaizer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class LoginView(TokenObtainPairView):
+    throttle_classes = [LoginThrottle]
+
 
 class ProtectedAPIView(APIView):
     permission_classes = [IsAuthenticated]
