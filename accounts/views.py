@@ -15,6 +15,7 @@ from decimal import Decimal
 from .tasks import process_trade
 from core.throttles import LoginThrottle, RegisterThrottle
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework import exceptions
 
 class RegisterView(APIView):
     throttle_classes = [RegisterThrottle]  
@@ -87,12 +88,20 @@ class StockViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
+    def get_object(self):
+        # if self.action == "stock_detail":
+        symbol=self.kwargs.get(self.lookup_field)
+        stock = Stock.objects.filter(symbol=symbol).first()
+        if not stock:
+            raise exceptions.NotFound(detail="Stock not found")
+        return stock
+        # return super().get_object()
 
 
-    @action(detail=False, methods=["get"])
+    @action(detail=True, methods=["get"])
     def stock_detail(self, request, symbol=None):
 
-        stock = get_object_or_404(Stock, symbol=symbol)
+        stock = self.get_object()
         key = f"stock:{stock.symbol}"
         data = cache.get(key)
 
