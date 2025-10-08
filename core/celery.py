@@ -1,4 +1,5 @@
 import os
+
 from celery import Celery
 from kombu import Queue
 
@@ -18,6 +19,9 @@ app.conf.task_default_exchange = "default"
 app.conf.task_default_routing_key = "default"
 
 app.conf.task_routes = {
-    "accounts.tasks.process_trade":{"queue":"trades", "routing_key": "trades.high"},
-    "accounts.tasks.updates_stock_prices":{"queue":"updates", "routing_key":"updates.low"},
+    "accounts.tasks.process_trade": {"queue": "trades", "routing_key": "trades.high"},
+    "accounts.tasks.updates_stock_prices": {
+        "queue": "updates",
+        "routing_key": "updates.low",
+    },
 }

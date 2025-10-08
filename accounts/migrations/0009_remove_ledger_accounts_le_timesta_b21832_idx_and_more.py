@@ -6,36 +6,36 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounts', '0008_ledger_accounts_le_timesta_b21832_idx_and_more'),
+        ("accounts", "0008_ledger_accounts_le_timesta_b21832_idx_and_more"),
     ]
 
     operations = [
         migrations.RemoveIndex(
-            model_name='ledger',
-            name='accounts_le_timesta_b21832_idx',
+            model_name="ledger",
+            name="accounts_le_timesta_b21832_idx",
         ),
         migrations.RemoveIndex(
-            model_name='position',
-            name='accounts_po_symbol_85d9f0_idx',
+            model_name="position",
+            name="accounts_po_symbol_85d9f0_idx",
         ),
         migrations.RemoveIndex(
-            model_name='stock',
-            name='accounts_st_exchang_47f60c_idx',
+            model_name="stock",
+            name="accounts_st_exchang_47f60c_idx",
         ),
         migrations.RemoveIndex(
-            model_name='stock',
-            name='accounts_st_symbol_1c4bad_idx',
+            model_name="stock",
+            name="accounts_st_symbol_1c4bad_idx",
         ),
         migrations.RemoveIndex(
-            model_name='trade',
-            name='accounts_tr_symbol_aa7ae0_idx',
+            model_name="trade",
+            name="accounts_tr_symbol_aa7ae0_idx",
         ),
         migrations.RemoveIndex(
-            model_name='trade',
-            name='accounts_tr_timesta_aedcfd_idx',
+            model_name="trade",
+            name="accounts_tr_timesta_aedcfd_idx",
         ),
         migrations.AddIndex(
-            model_name='stock',
-            index=models.Index(fields=['symbol'], name='accounts_st_symbol_2cbfda_idx'),
+            model_name="stock",
+            index=models.Index(fields=["symbol"], name="accounts_st_symbol_2cbfda_idx"),
         ),
     ]
