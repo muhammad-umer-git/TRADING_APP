@@ -1,6 +1,7 @@
 import csv
 import logging
 import os
+import time
 from decimal import Decimal
 
 import yfinance as yf
@@ -120,7 +121,7 @@ def test_beat_task():
     return "Beat task executed"
 
 
-@shared_task(rate_limit="5/m", queue="updates", priority=9)
+@shared_task(rate_limit="9/m", queue="updates", priority=9)
 def update_stock_prices():
     logger.info("Starting stock price update task ...")
 
@@ -144,6 +145,8 @@ def update_stock_prices():
 
         except Exception as e:
             logger.error(f"Failed to update {symbol}: {e}")
+
+        time.sleep(2)
 
 
 @shared_task(rate_limit="1/h")

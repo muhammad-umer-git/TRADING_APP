@@ -107,13 +107,11 @@ class StockViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get_object(self):
-        # if self.action == "stock_detail":
         symbol = self.kwargs.get(self.lookup_field)
         stock = Stock.objects.filter(symbol=symbol).first()
         if not stock:
             raise exceptions.NotFound(detail="Stock not found")
         return stock
-        # return super().get_object()
 
     @action(detail=True, methods=["get"])
     def stock_detail(self, request, symbol=None):
