@@ -20,7 +20,7 @@ repos:
   - repo: local
     hooks:
       - id: run-tests-before-push
-        name: Run django tests before pushing
-        entry: bash -c "pytest"
+        name: Run django tests with SQLite
+        entry: bash -c "export ENVIRONMENT=TEST && pytest"
         language: system
-        stages: [push] 
+        stages: [pre-push] 

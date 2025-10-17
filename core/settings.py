@@ -24,11 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env(DEBUG=(bool, False))
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env("SECRET_KEY")
+SECRET_KEY = env.str("SECRET_KEY")
+print(env.str("SECRET_KEY"))
 DEBUG = env.bool("DEBUG", default=True)
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -65,7 +63,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
-
+# Default primary key field type
+# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 INTERNAL_IPS = ["127.0.0.1"]
 
 ROOT_URLCONF = "core.urls"
@@ -86,21 +85,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "core.wsgi.application"
-
-
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": env("DATABASE_NAME"),
-        "USER": env("DATABASE_USER"),
-        "PASSWORD": env("DATABASE_PASSWORD"),
-        "HOST": env("DATABASE_HOST"),
-        "PORT": env.int("DATABASE_PORT", default=5432),
-    }
-}
 
 
 # Password validation
@@ -238,3 +222,24 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(hour=0, minute=0),
     },
 }
+
+
+ENVIRONMENT = env.str("ENVIRONMENT", "TEST")
+if ENVIRONMENT == "TEST":
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "test_db.sqlite3",
+        }
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": env.str("DATABASE_NAME"),
+            "USER": env.str("DATABASE_USER"),
+            "PASSWORD": env.str("DATABASE_PASSWORD"),
+            "HOST": env.str("DATABASE_HOST"),
+            "PORT": env.str("DATABASE_PORT"),
+        }
+    }

@@ -1,9 +1,13 @@
+from unittest.mock import patch
+
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from accounts.models import Account, CustomUser, Ledger, Position, Stock
+
+# Mock the use of redis function
 
 
 class BaseAuthTestCase(APITestCase):
@@ -143,6 +147,7 @@ class StockTests(BaseAuthTestCase):
         self.assertEqual("Stock ingested Successfully", response.data["message"])
 
     def test_stock_detail(self):
+
         stock = Stock.objects.create(
             symbol="TSLA", name="Tesla", exchange="NASDAQ", price=250.0
         )
@@ -156,7 +161,8 @@ class StockTests(BaseAuthTestCase):
 
 
 class TradeTests(BaseAuthTestCase):
-    def test_create_trade(self):
+    @patch("accounts.views.process_trade.delay")
+    def test_create_trade(self, mock_process):
         stock = Stock.objects.create(
             symbol="AAPL", name="Apple", exchange="NASDAQ", price=170.0
         )
@@ -165,3 +171,4 @@ class TradeTests(BaseAuthTestCase):
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, 200)
         self.assertIn("successfully", response.data["message"])
+        mock_process.assert_called_once()

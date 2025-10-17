@@ -13,6 +13,7 @@ __pycache__/
 .idea/
 
 .env
+.docker.env
 
 # Logs
 logs/
