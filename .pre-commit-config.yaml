@@ -21,6 +21,6 @@ repos:
     hooks:
       - id: run-tests-before-push
         name: Run django tests with SQLite
-        entry: bash -c "pytest"
+        entry: bash -c "python manage.py test"
         language: system
         stages: [pre-push] 
