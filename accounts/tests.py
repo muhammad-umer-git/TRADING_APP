@@ -146,7 +146,8 @@ class StockTests(BaseAuthTestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual("Stock ingested Successfully", response.data["message"])
 
-    def test_stock_detail(self):
+    @patch("accounts.views.cache")
+    def test_stock_detail(self, mock_cache):
 
         stock = Stock.objects.create(
             symbol="TSLA", name="Tesla", exchange="NASDAQ", price=250.0
