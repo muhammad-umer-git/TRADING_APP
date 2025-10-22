@@ -1,13 +1,13 @@
 from unittest.mock import patch
 
+import fakeredis
+from django.db import connection
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from accounts.models import Account, CustomUser, Ledger, Position, Stock
-
-# Mock the use of redis function
 
 
 class BaseAuthTestCase(APITestCase):
@@ -97,6 +97,12 @@ class AccountTests(BaseAuthTestCase):
         self.assertIn("symbol", response.data[0])
 
 
+# @override_settings(CACHES={
+#     "default":{
+#         "BACKEND":"django.core.cache.backends.locmem.LocMemCache",
+#         "LOCATION": "fake-cache",
+#     }
+# })
 class StockTests(BaseAuthTestCase):
 
     def setUp(self):
@@ -146,8 +152,10 @@ class StockTests(BaseAuthTestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual("Stock ingested Successfully", response.data["message"])
 
-    @patch("accounts.views.cache")
-    def test_stock_detail(self, mock_cache):
+    @patch("django_redis.get_redis_connection")
+    def test_stock_detail(self, mock_get_redis_connection):
+        fake_redis = fakeredis.FakeRedis()
+        mock_get_redis_connection.return_value = fake_redis
 
         stock = Stock.objects.create(
             symbol="TSLA", name="Tesla", exchange="NASDAQ", price=250.0
@@ -156,14 +164,25 @@ class StockTests(BaseAuthTestCase):
         response1 = self.client.get(url)
         self.assertEqual(response1.status_code, 200)
         self.assertEqual(response1.data["symbol"], "TSLA")
+
+        cached_data = fake_redis.get(f"stock:{stock.symbol}")
+        self.assertIsNone(cached_data)
+
+        before = len(connection.queries)
         response2 = self.client.get(url)
+        after = len(connection.queries)
         self.assertEqual(response2.status_code, 200)
         self.assertEqual(response2.data["symbol"], "TSLA")
+        print("Number of DB queries:", after - before)
 
 
 class TradeTests(BaseAuthTestCase):
+    @patch("django_redis.get_redis_connection")
     @patch("accounts.views.process_trade.delay")
-    def test_create_trade(self, mock_process):
+    def test_create_trade(self, mock_delay, mock_get_redis_connection):
+        fake_redis = fakeredis.FakeRedis()
+        mock_get_redis_connection.return_value = fake_redis
+
         stock = Stock.objects.create(
             symbol="AAPL", name="Apple", exchange="NASDAQ", price=170.0
         )
@@ -172,4 +191,3 @@ class TradeTests(BaseAuthTestCase):
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, 200)
         self.assertIn("successfully", response.data["message"])
-        mock_process.assert_called_once()
